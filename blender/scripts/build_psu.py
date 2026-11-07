@@ -55,7 +55,7 @@ def build(M, coll):
                 cz = b + (j + 0.5) * (d - b) / rows
                 P.append(B("p_hole", (cx - 0.0011, Y0 + 0.0002, cz - 0.0011), (cx + 0.0011, Y0 + 0.0008, cz + 0.0011), mat_=M["chip"], coll=coll))
     # etiqueta lateral (lado cristal)
-    P.append(plane("p_label", 0.15, 0.081, (X0 - 0.0002, (Y0 + Y1) / 2, (Z0 + Z1) / 2), "X-", M["psu_label"], coll))
+    P.append(plane("p_label", 0.118, 0.0636, (X0 - 0.0002, (Y0 + Y1) / 2 - 0.008, (Z0 + Z1) / 2), "X-", M["psu_label"], coll))
     # tornillos traseros
     for (x, z) in ((-0.07, 0.021), (0.07, 0.021), (-0.07, 0.098), (0.07, 0.098)):
         P.append(cyl("p_screw", 0.003, 0.002, (x, Y1 + 0.007, z), "Y", 16, bevel=0.0006, mat_=M["screw"], coll=coll))

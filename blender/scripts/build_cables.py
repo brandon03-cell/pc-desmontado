@@ -18,17 +18,19 @@ def cable_24(M, coll):
     a = L.ATX24
     P = [mb("c24_plug", a[0] - 0.8, a[1] - 0.7, a[2] + 0.8, a[3] + 0.7, 12, 27, M, M["connector"], coll, bevel=0.8)]
     P.append(mb("c24_latch", a[0] - 3.2, (a[1] + a[3]) / 2 - 2.5, a[0] - 0.8, (a[1] + a[3]) / 2 + 2.5, 6, 25, M, M["connector"], coll, bevel=0.5))
-    mid = []
+    mid, mid2 = [], []
     for r, ur in enumerate((231.0, 237.0)):
         hh = 37.5 + (1 - r) * 3.4
         ug = 268.0 + (1 - r) * 3.4
         for c in range(12):
             vc = 86.2 + c * 4.3
-            vg = 108 + (vc - 110) * 0.68
+            vg = 108 + (vc - 110) * 0.68 + r * 1.4      # segunda fila desfasada
             pts = [W(ur, vc, 26), W(ur, vc, hh), W(250, vc, hh), W(ug, vg, hh), W(ug, vg, -16), W(ug, 300, -16)]
-            P.append(poly_tube("c24w", pts, R_WIRE, M["sleeve"], coll, bend_r=0.008, res=5, bevel_res=2))
+            P.append(poly_tube("c24w", pts, R_WIRE, M["sleeve"], coll, bend_r=0.008 + r * 0.0025, res=5, bevel_res=2))
             mid.append(W(246, vc, hh))
+            mid2.append(W(ug, vg, 12))
     P.append(comb("c24_comb", mid, M, coll))
+    P.append(comb("c24_comb2", mid2, M, coll))
     o = join(P, "Cable24Pin")
     set_origin(o, W((a[0] + a[2]) / 2, (a[1] + a[3]) / 2, 12))
     return o
@@ -66,7 +68,7 @@ def cable_pcie(M, coll):
             y = y0 + 0.0029 + c * 0.003
             pts = [(-0.058, y, z), (xb, y, z), (xb, y, 0.105), (xb, y, 0.085)]
             P.append(poly_tube("cpw", pts, 0.00142, M["sleeve"], coll, bend_r=0.008, res=5, bevel_res=2))
-            mid.append((xb, y, 0.19))
+            mid.append((xb, y, 0.205))
     # 4 cables de señal (sense)
     for c in range(2):
         y = y0 + 0.006 + c * 0.0076
@@ -74,6 +76,7 @@ def cable_pcie(M, coll):
         xb = -0.0845 - c * 0.0012
         P.append(poly_tube("cps", [(-0.058, y, z), (xb, y, z), (xb, y, 0.1), (xb, y, 0.085)], 0.0006, M["sleeve"], coll, bend_r=0.008, res=5, bevel_res=1))
     P.append(comb("cp_comb", mid, M, coll))
+    P.append(comb("cp_comb2", [(p[0], p[1], 0.15) for p in mid], M, coll))
     o = join(P, "CablePCIe")
     set_origin(o, (x0, (y0 + y1) / 2, zp))
     return o

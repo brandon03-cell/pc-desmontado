@@ -14,7 +14,7 @@ H_SUB0, H_SUB1 = 2.0, 3.2       # sustrato
 H_SKIRT = 4.35                   # faldón del IHS (lo pisa el ILM)
 H_IHS = 7.2                      # cara superior de la meseta
 PLAT = 17.0                      # semilado de la meseta (34 x 34 mm)
-PASTE_MAX = 0.38                 # mm
+PASTE_MAX = 0.24                 # mm
 
 
 def _uv_top(o, cu, cv, half):
@@ -40,13 +40,16 @@ def paste_mesh(M, coll, cu, cv):
 
     def hgt(x, y, s):
         # s = r/edge en [0,1]
-        base = PASTE_MAX * (1 - s ** 5) ** 0.6
-        # patrón de "levantado": crestas ramificadas
-        f1 = math.sin(x * 1.9 + 1.7 * math.sin(y * 0.6 + ph[4]))
-        f2 = math.sin(y * 2.3 + 1.4 * math.sin(x * 0.8 + ph[5]))
-        f3 = math.sin((x + y) * 3.7) * 0.4
-        ridge = 0.5 + 0.5 * max(-1.0, min(1.0, f1 * f2 + f3))
-        return base * (0.35 + 0.65 * ridge) + 0.02
+        base = PASTE_MAX * (1 - s ** 4) ** 1.2
+        # patrón de "levantado": crestas ramificadas que salen radiales del centro
+        r = math.hypot(x, y) + 1e-6
+        a = math.atan2(y, x)
+        f1 = math.sin(a * 9 + 0.35 * r + 1.2 * math.sin(r * 0.7 + ph[4]))
+        f2 = math.sin(a * 23 + 0.9 * math.sin(r * 1.3 + ph[5]))
+        f3 = math.sin(x * 2.9 + y * 1.7) * math.sin(y * 3.1 - x * 0.9)
+        k = min(1.0, r / 7.0) ** 2          # sin pellizco radial en el centro
+        ridge = 0.5 + 0.5 * max(-1.0, min(1.0, k * (0.6 * f1 + 0.25 * f2) + 0.45 * f3))
+        return base * (0.25 + 0.75 * ridge ** 1.5) + 0.01
 
     bm = bmesh.new()
     center = bm.verts.new(W(cu, cv, H_IHS + hgt(0, 0, 0)))

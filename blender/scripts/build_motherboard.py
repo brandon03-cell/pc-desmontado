@@ -169,10 +169,17 @@ def build(M, coll):
     boolean_cut(sock, [mb("cut", cu - 21.2, cv - 21.2, cu + 21.2, cv + 21.2, -1, 5, M, None, coll)])
     P.append(sock)
     # ILM: marco de acero con ventana; presiona el faldón del IHS y deja salir la meseta
-    ilm = mb("ilm", cu - 27, cv - 33, cu + 27, cv + 33, 2.6, 5.7, M, M["steel_bare"], coll, bevel=0.6)
-    boolean_cut(ilm, [mb("cut", cu - 18, cv - 18, cu + 18, cv + 18, 0, 7, M, None, coll, bevel=2.0),
-                      mb("cut", cu - 20.6, cv - 20.6, cu + 20.6, cv + 20.6, 1.0, 4.45, M, None, coll)])
+    # Marco de chapa estampada (1,4 mm) abierto por los lados u: pisa solo los bordes v del IHS
+    ilm = mb("ilm", cu - 27, cv - 33, cu + 27, cv + 33, 4.35, 5.75, M, M["ilm"], coll, bevel=0.5)
+    boolean_cut(ilm, [mb("cut", cu - 22, cv - 18, cu + 22, cv + 18, 0, 7, M, None, coll, bevel=1.5)])
     P.append(ilm)
+    # patas del marco hasta la placa (esquinas)
+    for su in (-1, 1):
+        for sv in (-1, 1):
+            P.append(mb("ilm_leg", cu + su * 25.5 - 1.5, cv + sv * 31 - 2, cu + su * 25.5 + 1.5, cv + sv * 31 + 2, 0, 4.4, M, M["ilm"], coll))
+    # rebordes estampados del marco
+    for sv in (-1, 1):
+        P.append(mb("ilm_rib", cu - 22, cv + sv * 25.5 - 1, cu + 22, cv + sv * 25.5 + 1, 5.75, 6.25, M, M["ilm"], coll, bevel=0.4))
     # palanca
     lever = [W(cu - 31, cv + 33, 3.8), W(cu - 31, cv - 30, 3.8), W(cu - 27, cv - 34, 3.8)]
     P.append(lib.poly_tube("lever", lever, 0.0009, M["steel_bare"], coll, bend_r=0.003))
@@ -180,7 +187,7 @@ def build(M, coll):
     P.append(mb("lever_hook", cu - 32.5, cv - 36, cu - 29, cv - 33, 0, 5.0, M, M["steel_bare"], coll, bevel=0.5))
     for su in (-1, 1):
         for sv in (-1, 1):
-            P.append(mbcyl("ilm_screw", cu + su * 23, cv + sv * 29.5, 2.4, 5.7, 6.9, M["screw_silver"], coll, 16, 0.4))
+            P.append(mbcyl("ilm_screw", cu + su * 23, cv + sv * 29.5, 1.9, 5.75, 6.7, M["screw"], coll, 16, 0.35))
     # orificios de montaje del disipador (estándar AM4/AM5: 54 x 90 mm)
     for su in (-1, 1):
         for sv in (-1, 1):
@@ -241,8 +248,28 @@ def build(M, coll):
             P.append(mb("sata", a[0], v, a[2], v + 9, j * 6, j * 6 + 5.5, M, M["connector"], coll, bevel=0.3))
             P.append(mb("sata_in", a[2] - 0.1, v + 1.5, a[2] + 0.2, v + 7.5, j * 6 + 1.5, j * 6 + 4, M, M["chip"], coll))
     # ---------------------------------------------------------- cabeceras inferiores y ventilador
-    for k, u in enumerate((152, 168, 186, 208, 226)):
-        P += header(f"hdr{k}", u, 297.5, 5 if k != 1 else 6, 2, M, coll, shroud=(k in (1, 2)))
+    for (u, cols, kind) in L.BOTTOM_HDRS:
+        P += header(f"hdr_{kind}", u, 297.5, cols, 2, M, coll, shroud=(kind in ("usb3", "audio")))
+    # Cables de la caja enchufados a las cabeceras: bajan y pasan detrás de la bandeja
+    def hdr_cable(u0, cols, tubes, r):
+        w = cols * 2.54
+        P.append(mb("plug", u0 - 0.4, 297.0, u0 + w + 0.4, 303.2, 8.6, 15.5, M, M["connector"], coll, bevel=0.5))
+        for k in range(tubes):
+            uu = u0 + w * (k + 0.5) / tubes
+            hh = 12.0 + (k % 2) * 0.4
+            pts = [W(uu, 302.5, hh), W(uu, 319, hh), W(uu, 319, -14), W(uu + 6, 319, -14)]
+            P.append(lib.poly_tube("hdr_w", pts, r / 1000, M["sleeve"], coll, bend_r=0.006, res=5, bevel_res=2))
+    for (u, cols, kind) in L.BOTTOM_HDRS:
+        if kind == "usb3":
+            hdr_cable(u, cols, 4, 2.0)
+        elif kind == "audio":
+            hdr_cable(u, cols, 2, 1.5)
+        elif kind == "fpanel":
+            hdr_cable(u, cols, 4, 0.75)
+    a = L.M2_3_HS
+    P.append(mb("m2c_hs", a[0], a[1], a[2], a[3], 0, 8, M, gm, coll, bevel=1.0))
+    for k in range(6):
+        P.append(mb("m2c_groove", a[0] + 4, a[1] + 6 + k * 6, a[2] - 4, a[1] + 7.2 + k * 6, 8, 8.4, M, dk, coll))
     P += header("cpufan", L.CPU_FAN_HDR[0], L.CPU_FAN_HDR[1], 4, 1, M, coll, shroud=False)
     P += header("sysfan1", 2.0, 170.0, 4, 1, M, coll, shroud=False)
     P += header("argb1", 216.0, 4.0, 3, 1, M, coll, shroud=False)
@@ -256,7 +283,7 @@ def build(M, coll):
         P.append(mbcyl("audiocap_t", u, v, 2.7, 9, 9.3, M["cap"], coll, 18))
 
     # ---------------------------------------------------------- Chips varios
-    chips = [(55, 190, 14, 14, 1.6), (95, 188, 9, 9, 1.2), (78, 238, 6, 5, 1.4), (110, 228, 10, 10, 1.3),
+    chips = [(78, 240, 6, 5, 1.4), (112, 230, 10, 10, 1.3),
              (182, 160, 7, 7, 1.2), (60, 116, 8, 8, 1.1), (20, 172, 12, 12, 1.4), (198, 264, 6, 9, 1.2)]
     for (u, v, w, h, t) in chips:
         P.append(mb("chip", u - w / 2, v - h / 2, u + w / 2, v + h / 2, 0, t, M, M["chip"], coll, bevel=0.2))

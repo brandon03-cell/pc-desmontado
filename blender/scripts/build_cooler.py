@@ -34,12 +34,12 @@ def build(M, coll):
 
     # Heatpipes: 6 en U. Tramo de base a lo largo de v, patas suben (h) al bloque de aletas.
     r_hp = 3.0
-    legs_v = [8, 20, 32, 44, 54, 62]       # separación desde el centro (mm) para cada tubo
+    legs_v = [6, 14, 22, 30, 38, 46]       # separación desde el centro (mm) para cada tubo
     order = [2, 4, 0, 5, 1, 3]
     for i in range(6):
         ub = cu + (i - 2.5) * 6.3                         # posición en la base
-        row = 1 if i % 2 else -1
-        ul = cu + row * 10.5                              # fila delantera/trasera en las aletas
+        row = 1 if order[i] % 2 else -1                   # tresbolillo: filas alternas
+        ul = cu + row * 9.0                               # fila delantera/trasera en las aletas
         sv = legs_v[order[i]]
         for side in (-1, 1):
             pts = [
@@ -47,11 +47,11 @@ def build(M, coll):
                 W(ub, cv + side * 14, H_BASE0 + 3.2 + r_hp),
                 W(ub, cv + side * (14 + sv * 0.35), H_BASE1 + 14),
                 W(ul, cv + side * sv, H_BASE1 + 34),
-                W(ul, cv + side * sv, FIN1 + 2.5),
+                W(ul, cv + side * sv, FIN1 + 1.8),
             ]
             P.append(lib.poly_tube(f"hp{i}_{side}", pts, r_hp / 1000, M["copper"], coll, bend_r=0.012, res=8, bevel_res=3))
-            # tapón niquelado en la punta
-            P.append(mbcyl("hp_cap", ul, cv + side * sv, r_hp + 0.15, FIN1 + 2.0, FIN1 + 4.2, M["nickel"], coll, 16, 0.8))
+            # extremo del heatpipe asomando por la tapa (cúpula baja niquelada)
+            P.append(mbcyl("hp_cap", ul, cv + side * sv, r_hp + 0.1, FIN1 + 2.0, FIN1 + 3.4, M["nickel"], coll, 20, 0.65))
 
     # Aletas
     pitch = (FIN1 - FIN0) / (N_FINS - 1)

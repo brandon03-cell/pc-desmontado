@@ -87,11 +87,13 @@ def build(M, coll):
         B("cut", (0.08, -0.068, 0.315), (0.11, -0.046, 0.392), bevel=0.006, coll=coll),   # pasacables 24 pines
         B("cut", (0.08, -0.068, 0.17), (0.11, -0.046, 0.25), bevel=0.006, coll=coll),
         B("cut", (0.08, 0.13, 0.452), (0.11, 0.2, 0.469), bevel=0.004, coll=coll),        # EPS superior
+        B("cut", (0.08, -0.04, 0.119), (0.11, 0.068, 0.135), bevel=0.004, coll=coll),     # cabeceras inferiores
     ]
     boolean_cut(tray, tray_cuts)
     parts.append(tray)
     # Pasacables de goma (marcos)
-    for (ya, yb, za, zb) in ((-0.068, -0.046, 0.315, 0.392), (-0.068, -0.046, 0.17, 0.25), (0.13, 0.2, 0.452, 0.469)):
+    for (ya, yb, za, zb) in ((-0.068, -0.046, 0.315, 0.392), (-0.068, -0.046, 0.17, 0.25), (0.13, 0.2, 0.452, 0.469),
+                             (-0.04, 0.068, 0.119, 0.135)):
         g = B("c_grommet", (TRAY_X - 0.002, ya - 0.002, za - 0.002), (TRAY_X + 0.003, yb + 0.002, zb + 0.002), bevel=0.0015, mat_=M["rubber"], coll=coll)
         boolean_cut(g, [B("cut", (0.08, ya + 0.0015, za + 0.0015), (0.11, yb - 0.0015, zb - 0.0015), bevel=0.003, coll=coll)])
         parts.append(g)

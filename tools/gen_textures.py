@@ -137,7 +137,7 @@ def motherboard():
                 smd(cx, cy + k * 22, rng.random() < 0.5)
 
     # Serigrafía
-    silk = (226, 226, 220)
+    silk = (168, 168, 162)
     ws = Image.new("L", (W, H), 0)
     dws = ImageDraw.Draw(ws)
 
@@ -166,7 +166,7 @@ def motherboard():
     silk_rect(L.SOCKET_FRAME, 4)
     for u in L.DIMM_U:
         silk_rect((u - L.DIMM_W / 2 - 1, L.DIMM_V[0] - 1, u + L.DIMM_W / 2 + 1, L.DIMM_V[1] + 1))
-    for r in (L.PCIE1, L.PCIE2, L.PCIE_X1, L.ATX24, L.M2_HEATSINK, L.CHIPSET_HS, L.SATA, L.M2_2_HS, L.FRONT_HDR, L.AUDIO):
+    for r in (L.PCIE1, L.PCIE2, L.PCIE_X1, L.ATX24, L.M2_HEATSINK, L.CHIPSET_HS, L.SATA, L.M2_2_HS, L.M2_3_HS, L.FRONT_HDR, L.AUDIO):
         silk_rect((r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1))
     for r in L.EPS:
         silk_rect((r[0] - 1, r[1] - 0.5, r[2] + 1, r[3] + 1))
@@ -397,7 +397,7 @@ def gpu_backplate():
     W, H = 2048, 816  # 305 x 121 mm
     alb = Image.new("RGB", (W, H), (58, 60, 64))
     d = ImageDraw.Draw(alb)
-    mr = Image.new("RGB", (W, H), (255, 90, 255))   # metal anodizado
+    mr = Image.new("RGB", (W, H), (255, 118, 255))   # metal anodizado (rugosidad ~0.46)
     dm = ImageDraw.Draw(mr)
     # franjas de diseño (pintura negra mate, dieléctrica)
     def paint(poly):
