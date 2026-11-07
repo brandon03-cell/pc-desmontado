@@ -26,6 +26,8 @@ export const camState = {
   tz: HERO_CAM.target[2],
   shiftX: 0,
   shiftY: 0,
+  /** Multiplicador extra de distancia (solo móvil, por paso) */
+  dolly: 1,
 }
 
 /** Estado global ligero (t = tiempo de timeline suavizado, 0..N-1). */

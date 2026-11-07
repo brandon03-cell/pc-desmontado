@@ -9,7 +9,7 @@ export function CameraRig() {
   useFrame(({ camera, size }) => {
     const c = camState
     // En pantallas estrechas se aleja la cámara para que quepa la pieza (dolly por aspecto)
-    const k = Math.min(2.4, Math.max(1, 1.2 / (size.width / size.height)))
+    const k = Math.min(2.4, Math.max(1, 1.2 / (size.width / size.height))) * c.dolly
     camera.position.set(c.tx + (c.px - c.tx) * k, c.ty + (c.py - c.ty) * k, c.tz + (c.pz - c.tz) * k)
     camera.lookAt(c.tx, c.ty, c.tz)
     // Desplaza el encuadre para dejar sitio al panel de texto
