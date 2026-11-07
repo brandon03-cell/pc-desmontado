@@ -98,13 +98,18 @@ def motherboard():
                 dh.line((ax + px_, ay + py_, bx + px_, by + py_), fill=110, width=wdt)
         # vía al final del haz
         vx, vy = cx, cy
-        d.ellipse((vx - 6, vy - 6, vx + 6, vy + 6), fill=(120, 96, 52))
-        d.ellipse((vx - 2.5, vy - 2.5, vx + 2.5, vy + 2.5), fill=(8, 8, 8))
-        dm.ellipse((vx - 6, vy - 6, vx + 6, vy + 6), fill=255)
+        d.ellipse((vx - 6, vy - 6, vx + 6, vy + 6), fill=(34, 37, 40))
+        d.ellipse((vx - 2.5, vy - 2.5, vx + 2.5, vy + 2.5), fill=(12, 12, 13))
+        dh.ellipse((vx - 6, vy - 6, vx + 6, vy + 6), fill=160)
 
     # Vías sueltas
     for _ in range(1600):
         vx, vy = rng.uniform(0, W), rng.uniform(0, H)
+        if rng.random() < 0.85:   # vía tapada por la máscara de soldadura (tented)
+            d.ellipse((vx - 4, vy - 4, vx + 4, vy + 4), fill=(31, 34, 37))
+            d.ellipse((vx - 1.5, vy - 1.5, vx + 1.5, vy + 1.5), fill=(14, 15, 16))
+            dh.ellipse((vx - 4, vy - 4, vx + 4, vy + 4), fill=150)
+            continue
         d.ellipse((vx - 4, vy - 4, vx + 4, vy + 4), fill=(110, 92, 55))
         d.ellipse((vx - 1.5, vy - 1.5, vx + 1.5, vy + 1.5), fill=(6, 6, 6))
         dm.ellipse((vx - 4, vy - 4, vx + 4, vy + 4), fill=200)

@@ -9,6 +9,9 @@
  *
  * Cada pieza es un nodo de primer nivel en el GLB con el nombre exacto de `nodes`.
  * El origen de cada nodo está en su punto de montaje lógico (p. ej. la GPU en su conector PCIe).
+ * Hijos animables: "<Pieza>_Rotor" (FanFront1_Rotor…, FanRear_Rotor, CPUCooler_Rotor,
+ * GPU_Fan1..3_Rotor, PSU_Fan_Rotor) son las aspas; giran sobre su eje local: Z para los
+ * ventiladores de caja y del disipador, Y para los de la GPU y la PSU.
  * `approx` es la caja aproximada (centro y tamaño, en coordenadas three) para placeholders
  * mientras no exista el GLB definitivo.
  */
@@ -50,7 +53,7 @@ export const PARTS: PartDef[] = [
       { name: 'FanFront1', approx: { center: [-0.01, 0.14, 0.2], size: [0.12, 0.12, 0.025] } },
       { name: 'FanFront2', approx: { center: [-0.01, 0.265, 0.2], size: [0.12, 0.12, 0.025] } },
       { name: 'FanFront3', approx: { center: [-0.01, 0.39, 0.2], size: [0.12, 0.12, 0.025] } },
-      { name: 'FanRear', approx: { center: [0.015, 0.367, -0.205], size: [0.12, 0.12, 0.025] } },
+      { name: 'FanRear', approx: { center: [-0.024, 0.367, -0.2115], size: [0.12, 0.12, 0.025] } },
     ],
   },
   {
@@ -92,6 +95,7 @@ export const PARTS: PartDef[] = [
     id: 'psu',
     nodes: [
       { name: 'Cable24Pin', approx: { center: [0.07, 0.33, 0.03], size: [0.03, 0.06, 0.04] } },
+      { name: 'CableEPS', approx: { center: [0.06, 0.45, -0.17], size: [0.03, 0.03, 0.02] } },
       { name: 'PSU', approx: { center: [0, 0.058, -0.14], size: [0.15, 0.086, 0.16] } },
     ],
   },
