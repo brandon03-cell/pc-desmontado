@@ -33,6 +33,8 @@ export const camState = {
 /** Estado global ligero (t = tiempo de timeline suavizado, 0..N-1). */
 export const sceneState = {
   t: 0,
+  /** Giro (rad) del grupo del PC en el hero; lo escribe PCModel (para refrescar sombras) */
+  spin: 0,
   reducedMotion:
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 }
@@ -59,6 +61,8 @@ function createStore<T>(initial: T) {
 
 export const readyStore = createStore(false)
 export const stepStore = createStore(0)
+/** true si la escena 3D no ha podido cargarse (sin WebGL, fallo de red…) */
+export const sceneFailStore = createStore(false)
 export const modeStore = createStore<'checking' | 'glb' | 'placeholder'>('checking')
 
 /** Progreso de carga de assets (0..100), alimentado desde la escena (carga diferida) */

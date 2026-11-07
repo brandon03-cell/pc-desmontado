@@ -14,7 +14,7 @@ import { ToneMappingMode } from 'postprocessing'
 export function Effects({ mobile }: { mobile: boolean }) {
   if (mobile) {
     return (
-      <EffectComposer multisampling={4}>
+      <EffectComposer multisampling={2}>
         <Bloom luminanceThreshold={0.9} luminanceSmoothing={0.15} intensity={0.75} mipmapBlur radius={0.6} />
         <ToneMapping mode={ToneMappingMode.AGX} />
       </EffectComposer>

@@ -1,28 +1,18 @@
-import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { ContactShadows, Environment, Lightformer, PerformanceMonitor, useProgress } from '@react-three/drei'
+import { Environment, Lightformer, PerformanceMonitor, useGLTF, useProgress } from '@react-three/drei'
 import { NoToneMapping } from 'three'
-import { PCModel, GLB_URL } from './PCModel'
+import { PCModel } from './PCModel'
+import { ContactShadowsOnDemand, ShadowMapUpdater } from './Shadows'
+import { HDRI_URL, glbUrlFor, isMobileNow, useIsLowPower, useIsMobile } from './device'
 import { CameraRig } from './CameraRig'
 import { Effects } from './Effects'
 import { modeStore, progressStore } from './animationState'
 import { useAssetProbe } from './useAssetProbe'
 import { HERO_CAM } from './choreography'
 
-const HDRI_URL = '/hdri/studio_1k.hdr'
-
-const query = '(pointer: coarse), (max-width: 767px)'
-const subscribeMobile = (cb: () => void) => {
-  const mq = window.matchMedia(query)
-  mq.addEventListener('change', cb)
-  return () => mq.removeEventListener('change', cb)
-}
-const useIsMobile = () =>
-  useSyncExternalStore(
-    subscribeMobile,
-    () => window.matchMedia(query).matches,
-    () => false,
-  )
+// Producción: sin sondeo HEAD; el GLB adecuado se pide cuanto antes
+if (import.meta.env.PROD && !import.meta.env.VITE_USE_PLACEHOLDERS) useGLTF.preload(glbUrlFor(isMobileNow()), false, true)
 
 /** Estudio procedural (sin red) cuando todavía no existe el HDRI real. */
 function ProceduralStudio() {
@@ -51,10 +41,17 @@ function ProceduralStudio() {
 }
 
 export default function Experience() {
+  if (import.meta.env.DEV && new URLSearchParams(location.search).has('nowebgl')) {
+    throw new Error('WebGL simulado como no disponible (?nowebgl)')
+  }
   const mobile = useIsMobile()
-  const glb = useAssetProbe(GLB_URL, import.meta.env.VITE_USE_PLACEHOLDERS ? 'no' : undefined)
-  const hdri = useAssetProbe(HDRI_URL)
-  const maxDpr = mobile ? 1.5 : 2
+  const lowPower = useIsLowPower()
+  const PROD = import.meta.env.PROD
+  // Dev: sondeo HEAD de la URL que se va a usar (Vite sirve index.html con 200 en rutas inexistentes → placeholders).
+  // Prod: se asume que existen; si fallan, el ErrorBoundary de App muestra el aviso.
+  const glb = useAssetProbe(glbUrlFor(mobile), import.meta.env.VITE_USE_PLACEHOLDERS ? 'no' : PROD ? 'yes' : undefined)
+  const hdri = useAssetProbe(HDRI_URL, PROD ? 'yes' : undefined)
+  const maxDpr = lowPower ? 1.5 : 1.75
   const [dpr, setDpr] = useState(() => Math.min(window.devicePixelRatio || 1, maxDpr))
   const resolved = glb !== 'checking' && hdri !== 'checking'
   const mode = glb === 'yes' ? 'glb' : 'placeholder'
@@ -77,6 +74,8 @@ export default function Experience() {
     >
       <color attach="background" args={['#090b11']} />
       <PerformanceMonitor
+        flipflops={3}
+        onFallback={() => setDpr(1)}
         onDecline={() => setDpr((d) => Math.max(1, d - 0.25))}
         onIncline={() => setDpr((d) => Math.min(maxDpr, d + 0.25))}
       />
@@ -85,7 +84,7 @@ export default function Experience() {
         <directionalLight
           position={[0.8, 1.8, 1.2]}
           intensity={1.1}
-          castShadow={!mobile}
+          castShadow={!lowPower}
           shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-0.7}
           shadow-camera-right={0.7}
@@ -100,17 +99,11 @@ export default function Experience() {
         <directionalLight position={[-1.6, 0.7, 0.4]} intensity={0.55} color="#e6edff" />
         {/* Rim frío desde atrás */}
         <directionalLight position={[-1.2, 0.6, -1.4]} intensity={0.7} color="#8fa8ff" />
-        <PCModel mode={mode} mobile={mobile} />
-        <ContactShadows
-          position={[0, 0.001, 0]}
-          opacity={0.65}
-          scale={2.4}
-          blur={2.6}
-          far={0.6}
-          resolution={mobile ? 256 : 512}
-        />
+        <PCModel mode={mode} mobile={mobile} lowPower={lowPower} />
+        <ContactShadowsOnDemand resolution={lowPower ? 256 : 512} />
+        {!lowPower && <ShadowMapUpdater />}
         <CameraRig />
-        <Effects mobile={mobile} />
+        <Effects mobile={lowPower} />
       </Suspense>
     </Canvas>
   )

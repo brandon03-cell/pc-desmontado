@@ -1,9 +1,11 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, useSyncExternalStore } from 'react'
 import { PIEZAS } from './content'
 import { STEPS } from './scene/choreography'
-import { nodeAnim, sceneState } from './scene/animationState'
+import { nodeAnim, sceneFailStore, sceneState } from './scene/animationState'
 import { setupTimeline, stepScrollY } from './scroll/timeline'
 import { getLenis, useLenis } from './scroll/useLenis'
+import { SceneBoundary } from './scene/SceneBoundary'
+import { warmAssets } from './scene/device'
 import { Hero } from './ui/Hero'
 import { Loader } from './ui/Loader'
 import { Outro } from './ui/Outro'
@@ -13,7 +15,10 @@ import { ProgressNav } from './ui/ProgressNav'
 // La escena 3D (three/R3F/drei/postprocessing) se carga aparte: el HTML y el loader pintan antes
 const Experience = lazy(() => import('./scene/Experience'))
 
+warmAssets()
+
 export default function App() {
+  const failed = useSyncExternalStore(sceneFailStore.subscribe, sceneFailStore.get)
   useLenis()
   useEffect(() => setupTimeline(), [])
   useEffect(() => {
@@ -37,12 +42,20 @@ export default function App() {
     <>
       <Loader />
       <div className="stage" aria-hidden="true">
-        <Suspense fallback={null}>
-          <Experience />
-        </Suspense>
+        <SceneBoundary>
+          <Suspense fallback={null}>
+            <Experience />
+          </Suspense>
+        </SceneBoundary>
       </div>
       <div className="vignette" aria-hidden="true" />
-      <ProgressNav />
+      {failed ? (
+        <p className="notice" role="status">
+          Tu navegador no ha podido cargar la escena 3D. Te dejamos el contenido en formato texto.
+        </p>
+      ) : (
+        <ProgressNav />
+      )}
       <main>
         <div className="track" />
         <div className="overlay">
