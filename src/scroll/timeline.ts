@@ -38,9 +38,10 @@ function frameShift(step: StepDef, mobile: boolean) {
   if (mobile) {
     if (step.kind === 'hero') return { shiftX: 0, shiftY: -0.14 }
     if (step.kind === 'outro') return { shiftX: 0, shiftY: 0 }
-    return { shiftX: 0, shiftY: 0.2 }
+    return { shiftX: 0, shiftY: 0.24 }
   }
   if (step.kind === 'hero') return { shiftX: -0.15, shiftY: 0 }
+  if (step.kind === 'outro') return { shiftX: -0.2, shiftY: 0.06 }
   if (step.side === 'right') return { shiftX: TIMING.shiftX, shiftY: 0 }
   if (step.side === 'left') return { shiftX: -TIMING.shiftX, shiftY: 0 }
   return { shiftX: 0, shiftY: 0 }

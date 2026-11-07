@@ -108,8 +108,9 @@ button {
 .hero {
   position: absolute;
   left: clamp(24px, 6vw, 96px);
-  top: 50%;
-  translate: 0 -50%;
+  inset-block: 0;
+  margin-block: auto;
+  height: fit-content;
   max-width: min(640px, 90vw);
   display: grid;
   gap: 20px;
@@ -171,8 +172,9 @@ button {
 /* ---------- Paneles ---------- */
 .panel {
   position: absolute;
-  top: 50%;
-  translate: 0 -50%;
+  inset-block: 0;
+  margin-block: auto;
+  height: fit-content;
   width: min(430px, 34vw);
   max-height: 86vh;
   overflow: hidden;
@@ -196,10 +198,11 @@ button {
   right: clamp(56px, 6vw, 110px);
 }
 .panel[data-side='center'] {
-  left: 50%;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   top: auto;
   bottom: 9vh;
-  translate: -50% 0;
   width: min(560px, 90vw);
   text-align: center;
 }
@@ -518,29 +521,28 @@ button {
   }
   .hero {
     top: 9vh;
-    translate: 0 0;
+    bottom: auto;
+    margin-block: 0;
     gap: 14px;
   }
   .hero h1 {
     font-size: clamp(2.2rem, 11vw, 3rem);
   }
-  .cta-scroll {
-    position: fixed;
-    bottom: 5vh;
-    left: 24px;
-  }
   .panel,
   .panel[data-side] {
     top: auto;
-    translate: 0 0;
+    margin: 0;
     left: 10px;
     right: 10px;
     bottom: 10px;
     width: auto;
-    max-height: 46vh;
+    max-height: 52vh;
     padding: 16px 18px 14px;
     border-radius: 18px;
     pointer-events: none;
+  }
+  .panel li:nth-child(n + 4) {
+    display: none;
   }
   .panel__num {
     font-size: 1.4rem;
@@ -571,7 +573,7 @@ button {
   }
   .panel[data-side='center'] {
     left: 10px;
-    translate: 0 0;
+    right: 10px;
     width: auto;
   }
   .pnav {

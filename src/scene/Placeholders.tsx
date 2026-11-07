@@ -22,11 +22,11 @@ const glow = (color: string, intensity = 4) =>
 const M = {
   case: metal('#1b1e27', 0.5, 0.7),
   glass: new THREE.MeshPhysicalMaterial({
-    color: '#aab8d0',
+    color: '#7f90ad',
     roughness: 0.05,
     metalness: 0,
     transparent: true,
-    opacity: 0.16,
+    opacity: 0.1,
     depthWrite: false,
     side: THREE.DoubleSide,
   }),

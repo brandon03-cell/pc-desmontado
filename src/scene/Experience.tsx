@@ -27,7 +27,7 @@ const useIsMobile = () =>
 /** Estudio procedural (sin red) cuando todavía no existe el HDRI real. */
 function ProceduralStudio() {
   return (
-    <Environment resolution={256} environmentIntensity={0.9}>
+    <Environment resolution={256} environmentIntensity={0.4}>
       <Lightformer form="rect" intensity={3} position={[0, 3, 2]} scale={[6, 3, 1]} rotation-x={Math.PI / 2.4} />
       <Lightformer
         form="rect"
@@ -78,10 +78,10 @@ export default function Experience() {
         onIncline={() => setDpr((d) => Math.min(maxDpr, d + 0.25))}
       />
       <Suspense fallback={null}>
-        {hdri === 'yes' ? <Environment files={HDRI_URL} environmentIntensity={0.9} /> : <ProceduralStudio />}
+        {hdri === 'yes' ? <Environment files={HDRI_URL} environmentIntensity={0.4} /> : <ProceduralStudio />}
         <directionalLight
           position={[0.8, 1.8, 1.2]}
-          intensity={1.4}
+          intensity={1.1}
           castShadow={!mobile}
           shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-0.7}

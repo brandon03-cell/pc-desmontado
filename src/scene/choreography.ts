@@ -66,7 +66,7 @@ export const TIMING = {
   shiftX: 0.16,
 }
 
-const HERO: CamKey = { pos: [-0.85, 0.42, 1.05], target: [0, 0.24, 0] }
+const HERO: CamKey = { pos: [-1.15, 0.55, 1.5], target: [0, 0.24, 0] }
 export const HERO_CAM = HERO
 
 export const STEPS: StepDef[] = [
@@ -161,7 +161,7 @@ export const STEPS: StepDef[] = [
     id: 'explode',
     label: 'Explosionada',
     kind: 'caption',
-    cam: { pos: [-2.1, 1.35, 2.7], target: [-0.1, 0.55, 0] },
+    cam: { pos: [-2.6, 1.35, 3.3], target: [-0.05, 0.55, 0] },
     caption: {
       titulo: 'Vista explosionada',
       texto: 'Todas las piezas, flotando en el orden en que las has visto salir.',
