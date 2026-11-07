@@ -68,7 +68,7 @@ export default function Experience() {
   return (
     <Canvas
       dpr={Math.min(dpr, maxDpr)}
-      shadows
+      shadows="percentage"
       camera={{ fov: 32, near: 0.05, far: 30, position: HERO_CAM.pos }}
       gl={{ antialias: false, powerPreference: 'high-performance', toneMapping: NoToneMapping }}
     >

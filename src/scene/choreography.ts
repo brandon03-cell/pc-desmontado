@@ -152,7 +152,7 @@ export const STEPS: StepDef[] = [
     kind: 'part',
     partId: 'ssd',
     side: 'right',
-    stagger: 0.14,
+    stagger: 0.1,
     cam: { pos: [-0.38, 0.4, 0.1], target: [-0.03, 0.3, -0.1] },
   },
   {
