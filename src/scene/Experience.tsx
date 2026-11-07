@@ -1,11 +1,11 @@
 import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { ContactShadows, Environment, Lightformer, PerformanceMonitor } from '@react-three/drei'
+import { ContactShadows, Environment, Lightformer, PerformanceMonitor, useProgress } from '@react-three/drei'
 import { NoToneMapping } from 'three'
 import { PCModel, GLB_URL } from './PCModel'
 import { CameraRig } from './CameraRig'
 import { Effects } from './Effects'
-import { modeStore } from './animationState'
+import { modeStore, progressStore } from './animationState'
 import { useAssetProbe } from './useAssetProbe'
 import { HERO_CAM } from './choreography'
 
@@ -58,6 +58,9 @@ export default function Experience() {
   const [dpr, setDpr] = useState(() => Math.min(window.devicePixelRatio || 1, maxDpr))
   const resolved = glb !== 'checking' && hdri !== 'checking'
   const mode = glb === 'yes' ? 'glb' : 'placeholder'
+
+  const { progress } = useProgress()
+  useEffect(() => progressStore.set(progress), [progress])
 
   useEffect(() => {
     if (resolved) modeStore.set(mode)

@@ -536,13 +536,12 @@ button {
     right: 10px;
     bottom: 10px;
     width: auto;
-    max-height: 52vh;
-    padding: 16px 18px 14px;
+    max-height: 56vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 14px 16px 12px;
     border-radius: 18px;
     pointer-events: none;
-  }
-  .panel li:nth-child(n + 4) {
-    display: none;
   }
   .panel__num {
     font-size: 1.4rem;
@@ -557,8 +556,11 @@ button {
   }
   .panel p,
   .panel li {
-    font-size: 0.8rem;
-    line-height: 1.4;
+    font-size: 0.78rem;
+    line-height: 1.32;
+  }
+  .panel ul {
+    gap: 1px;
   }
   .datos {
     margin-top: 10px;
@@ -600,4 +602,14 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* ---------- Foco visible ---------- */
+.pnav button:focus-visible,
+.cta-scroll:focus-visible,
+.outro__list button:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+  border-radius: 8px;
 }

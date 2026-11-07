@@ -1,6 +1,5 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { PIEZAS } from './content'
-import Experience from './scene/Experience'
 import { STEPS } from './scene/choreography'
 import { nodeAnim, sceneState } from './scene/animationState'
 import { setupTimeline, stepScrollY } from './scroll/timeline'
@@ -10,6 +9,9 @@ import { Loader } from './ui/Loader'
 import { Outro } from './ui/Outro'
 import { PartPanel } from './ui/PartPanel'
 import { ProgressNav } from './ui/ProgressNav'
+
+// La escena 3D (three/R3F/drei/postprocessing) se carga aparte: el HTML y el loader pintan antes
+const Experience = lazy(() => import('./scene/Experience'))
 
 export default function App() {
   useLenis()
@@ -35,7 +37,9 @@ export default function App() {
     <>
       <Loader />
       <div className="stage" aria-hidden="true">
-        <Experience />
+        <Suspense fallback={null}>
+          <Experience />
+        </Suspense>
       </div>
       <div className="vignette" aria-hidden="true" />
       <ProgressNav />

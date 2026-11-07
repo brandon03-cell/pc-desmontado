@@ -61,3 +61,12 @@ render target MRT de n8ao 2.0.1 sobrescribe `texture` con el array `textures` y 
 - Móvil / GPU débil: `pc-mobile.glb` (texturas 1024), DPR 1–1.5, sin N8AO, cristal alpha, bloom
   más barato, paneles como bottom sheet.
 - `PerformanceMonitor` de drei baja el DPR si cae el framerate.
+
+## Carga y rendimiento
+- La escena 3D se carga con `React.lazy` + `Suspense` (`App.tsx`): el HTML, el hero y el loader pintan
+  antes. El progreso del loader viene de `progressStore`, alimentado desde `Experience` (`useProgress`).
+- Chunks (`vite.config.ts`, `rolldownOptions.output.codeSplitting`): `three`, `postfx`, `r3f`, `react`, `anim`
+  (gsap + lenis). `three` (~745 kB) es indivisible, de ahí `chunkSizeWarningLimit: 750`.
+- Hero: vaivén de ±50° alrededor de la vista 3/4 del cristal (en vez de giro 360°); `prefers-reduced-motion` lo para.
+- Aviso de consola `THREE.Clock: deprecated`: lo emite `@react-three/fiber` 9.x (instancia `new THREE.Clock()`
+  fija en su store, sin opción para evitarlo). Es inocuo; desaparecerá cuando R3F migre a `THREE.Timer`.

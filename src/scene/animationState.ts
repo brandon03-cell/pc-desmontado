@@ -60,3 +60,6 @@ function createStore<T>(initial: T) {
 export const readyStore = createStore(false)
 export const stepStore = createStore(0)
 export const modeStore = createStore<'checking' | 'glb' | 'placeholder'>('checking')
+
+/** Progreso de carga de assets (0..100), alimentado desde la escena (carga diferida) */
+export const progressStore = createStore(0)

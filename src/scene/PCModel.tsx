@@ -104,10 +104,14 @@ function tuneMaterials(root: THREE.Object3D, hq: boolean) {
   })
 }
 
+/** Amplitud (rad) del vaivén del hero: ±50° */
+const HERO_SWING = (50 * Math.PI) / 180
+
 /** Aplica los offsets animados sobre `assembled` + giro lento del hero + aspas. Idéntico para GLB y placeholders. */
 function Rig({ root, hq }: { root: THREE.Object3D; hq: boolean }) {
   const group = useRef<THREE.Group>(null)
   const spin = useRef(0)
+  const heroPhase = useRef(0)
   /** Velocidad (rad/s) y ángulo de cada rotor */
   const rotorSpin = useRef<{ speed: number; angle: number }[]>([])
 
@@ -180,12 +184,14 @@ function Rig({ root, hq }: { root: THREE.Object3D; hq: boolean }) {
       r.obj.quaternion.copy(r.q0).multiply(_q.setFromAxisAngle(r.axis, st.angle))
     })
 
-    // Giro del hero: solo al inicio; al empezar el scroll se amortigua a la vuelta entera más cercana
+    // Hero: vaivén lento (±50°) alrededor de la vista 3/4 del cristal, con velocidad de seno
+    // (más lento en los extremos). Al empezar el scroll se amortigua a 0 (vista del cristal).
     const g = group.current
     if (!g) return
     const active = sceneState.t < 0.01 && !sceneState.reducedMotion
-    if (active) spin.current += dt * 0.2
-    else spin.current = THREE.MathUtils.damp(spin.current, Math.round(spin.current / TWO_PI) * TWO_PI, 4, dt)
+    if (active) heroPhase.current += dt * 0.28
+    const target = active ? HERO_SWING * Math.sin(heroPhase.current) : 0
+    spin.current = THREE.MathUtils.damp(spin.current, target, active ? 3 : 4, dt)
     g.rotation.y = spin.current
   })
 

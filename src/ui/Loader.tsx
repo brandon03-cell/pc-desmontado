@@ -1,11 +1,10 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { useProgress } from '@react-three/drei'
-import { readyStore } from '../scene/animationState'
+import { progressStore, readyStore } from '../scene/animationState'
 import { getLenis } from '../scroll/useLenis'
 
 /** Pantalla de carga con progreso real (useProgress) y fade al terminar. */
 export function Loader() {
-  const { progress } = useProgress()
+  const progress = useSyncExternalStore(progressStore.subscribe, progressStore.get)
   const ready = useSyncExternalStore(readyStore.subscribe, readyStore.get)
   const [gone, setGone] = useState(false)
   const done = ready && (progress >= 100 || progress === 0)

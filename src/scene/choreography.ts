@@ -89,7 +89,7 @@ export const TIMING = {
 const HERO: CamKey = { pos: [-1.15, 0.55, 1.5], target: [0, 0.24, 0] }
 export const HERO_CAM = HERO
 
-const EXPLODE_CAM: CamKey = { pos: [-1.96, 1.38, 2.52], target: [0.02, 0.66, 0], mobileDolly: 1.15 }
+const EXPLODE_CAM: CamKey = { pos: [-1.96, 1.38, 2.52], target: [0.02, 0.66, 0], mobileDolly: 0.8 }
 
 export const STEPS: StepDef[] = [
   { id: 'hero', label: 'Inicio', kind: 'hero', cam: HERO },
@@ -160,9 +160,9 @@ export const STEPS: StepDef[] = [
     label: 'Fuente',
     kind: 'part',
     partId: 'psu',
-    side: 'left',
+    side: 'right',
     stagger: 0.08,
-    // Lateral y algo trasero: se ven los cables desconectados y la fuente salir de bajo la cubierta
+    // Panel a la derecha: la fuente sale hacia atrás-izquierda y queda libre de texto. Lateral y algo trasero: se ven los cables desconectados y la fuente salir de bajo la cubierta
     cam: { pos: [-1.12, 0.42, -0.6], target: [0.0, 0.2, -0.07] },
   },
   {
@@ -201,7 +201,7 @@ export const STEPS: StepDef[] = [
       texto: 'Cada componente vuelve a su sitio, en orden inverso.',
     },
   },
-  { id: 'outro', label: 'Resumen', kind: 'outro', cam: { pos: [-1.05, 0.5, 1.25], target: [0, 0.25, 0] } },
+  { id: 'outro', label: 'Resumen', kind: 'outro', cam: { pos: [-1.05, 0.5, 1.25], target: [0, 0.25, 0], mobileDolly: 0.85 } },
 ]
 
 /* ---------- Vista explosionada ----------
