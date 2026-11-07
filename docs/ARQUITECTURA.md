@@ -57,14 +57,34 @@ render target MRT de n8ao 2.0.1 sobrescribe `texture` con el array `textures` y 
 - Materiales emisivos de RGB llevan `emissiveIntensity` > 1 para bloom selectivo (luminanceThreshold).
 
 ## Calidad adaptativa
-- Escritorio: `pc.glb`, DPR hasta 2, N8AO, bloom, cristal con transmisión, sombras de contacto.
-- Móvil / GPU débil: `pc-mobile.glb` (texturas 1024), DPR 1–1.5, sin N8AO, cristal alpha, bloom
-  más barato, paneles como bottom sheet.
-- `PerformanceMonitor` de drei baja el DPR si cae el framerate.
+Definición única en `src/scene/device.ts`:
+- `mobile` = `(max-width: 767px)`, el mismo breakpoint que el CSS y que `gsap.matchMedia` en `timeline.ts`. Decide layout
+  (paneles bottom sheet), encuadre de cámara móvil y GLB (`pc-mobile.glb`, texturas 1024).
+- `lowPower` = `mobile` o `(pointer: coarse)` (tabletas): sin N8AO ni sombras de la luz, cristal alpha, DPR ≤ 1.5,
+  multisampling 2, ContactShadows 256. En CSS, `pointer: coarse` también quita `backdrop-filter` de los paneles.
+- Escritorio: `pc.glb`, DPR hasta 1.75, N8AO, bloom, cristal con transmisión, sombras.
+- `PerformanceMonitor` (`flipflops={3}`): baja/sube el DPR y, si oscila, cae a DPR 1 (`onFallback`).
+- Sombras: `shadowMap.autoUpdate = false`; `Shadows.tsx` marca `needsUpdate` solo si cambia `sceneState.t` o el giro del
+  hero. `ContactShadows` usa `frames={1}` y se refresca (≤ 8/s) con el mismo criterio.
+
+## Robustez
+- `SceneBoundary` (ErrorBoundary alrededor de `Suspense`/`Experience`): si falla WebGL, el chunk, el GLB o el HDRI, se oculta
+  el loader, aparece el aviso "Tu navegador no ha podido cargar la escena 3D…" y `html.no-3d` convierte los paneles en
+  una lista de texto estática. En dev se puede forzar con `/?nowebgl`.
+- Producción: no hay sondeo HEAD; `useGLTF.preload` + `<link rel=preload>` (`warmAssets`) piden el GLB adecuado antes de
+  que cargue el chunk 3D. En dev el sondeo comprueba la URL realmente usada (móvil o escritorio).
+- `PCModel` guarda el transform original (`p0`/`q0`) en `obj.userData` una sola vez, porque la escena de `useGLTF` está
+  cacheada y mutada; `userData.tuned` evita retocar materiales / recrear el cristal al remontar.
+- Accesibilidad: los paneles animan solo `opacity` (siguen en el árbol de accesibilidad); los botones de `ProgressNav`
+  tienen etiqueta visually-hidden en móvil y área ≥ 24 px. En móvil / ventanas bajas (`max-height: 600px`) el panel
+  muestra una versión compacta que cabe siempre (sin `.datos`, textos recortados), porque no puede desplazarse
+  sin capturar el scroll de la página.
+- Contenido: todos los textos (hero, captions, cierre) viven en `src/content/piezas.ts`.
 
 ## Carga y rendimiento
 - La escena 3D se carga con `React.lazy` + `Suspense` (`App.tsx`): el HTML, el hero y el loader pintan
   antes. El progreso del loader viene de `progressStore`, alimentado desde `Experience` (`useProgress`).
+  El scroll está bloqueado (Lenis `stop()` + `html.is-loading`) hasta que la escena está lista.
 - Chunks (`vite.config.ts`, `rolldownOptions.output.codeSplitting`): `three`, `postfx`, `r3f`, `react`, `anim`
   (gsap + lenis). `three` (~745 kB) es indivisible, de ahí `chunkSizeWarningLimit: 750`.
 - Hero: vaivén de ±50° alrededor de la vista 3/4 del cristal (en vez de giro 360°); `prefers-reduced-motion` lo para.

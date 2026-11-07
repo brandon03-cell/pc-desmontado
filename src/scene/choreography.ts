@@ -14,6 +14,7 @@
  */
 import type { PartId, Vec3 } from './parts'
 import { PARTS } from './parts'
+import { EXPLOSIONADA, REMONTAJE } from '../content/piezas'
 
 export interface CamKey {
   pos: Vec3
@@ -34,8 +35,6 @@ export interface NodeChoreo {
   exploded: Vec3
   /** Rotación (grados) en la vista explosionada. */
   explodedRot?: Vec3
-  /** Retraso extra (unidades de paso) además del stagger por orden. */
-  delay?: number
   /** Gira alrededor del origen de otro nodo (p. ej. la pasta térmica alrededor del CPU). */
   pivot?: string
 }
@@ -186,20 +185,14 @@ export const STEPS: StepDef[] = [
     label: 'Explosionada',
     kind: 'caption',
     cam: EXPLODE_CAM,
-    caption: {
-      titulo: 'Vista explosionada',
-      texto: 'Todas las piezas, flotando en el orden en que las has visto salir.',
-    },
+    caption: EXPLOSIONADA,
   },
   {
     id: 'reassemble',
     label: 'Remontaje',
     kind: 'caption',
     cam: { pos: [-1.0, 0.55, 1.5], target: [0, 0.26, 0] },
-    caption: {
-      titulo: 'Y ahora, a montarlo',
-      texto: 'Cada componente vuelve a su sitio, en orden inverso.',
-    },
+    caption: REMONTAJE,
   },
   { id: 'outro', label: 'Resumen', kind: 'outro', cam: { pos: [-1.05, 0.5, 1.25], target: [0, 0.25, 0], mobileDolly: 0.85 } },
 ]

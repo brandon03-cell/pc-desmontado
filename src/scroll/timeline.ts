@@ -12,6 +12,7 @@ import {
   type StepDef,
 } from '../scene/choreography'
 import { PARTS } from '../scene/parts'
+import { MOBILE_QUERY } from '../scene/device'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -115,8 +116,8 @@ function build(mobile: boolean) {
   if (hero) {
     tl.fromTo(
       hero,
-      { autoAlpha: 1, y: 0 },
-      { autoAlpha: 0, y: -40, duration: 0.25, ease: 'power2.in', immediateRender: false },
+      { opacity: 1, y: 0 },
+      { opacity: 0, y: -40, duration: 0.25, ease: 'power2.in', immediateRender: false },
       0,
     )
   }
@@ -138,14 +139,14 @@ function build(mobile: boolean) {
       if (el) {
         tl.fromTo(
           el,
-          { autoAlpha: 0, y: 40 },
-          { autoAlpha: 1, y: 0, duration: T.panelFade, ease: 'power2.out', immediateRender: false },
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: T.panelFade, ease: 'power2.out', immediateRender: false },
           i + T.panelIn,
         )
         tl.fromTo(
           el,
-          { autoAlpha: 1, y: 0 },
-          { autoAlpha: 0, y: -30, duration: T.panelFade, ease: 'power2.in', immediateRender: false },
+          { opacity: 1, y: 0 },
+          { opacity: 0, y: -30, duration: T.panelFade, ease: 'power2.in', immediateRender: false },
           i + T.panelOut,
         )
       }
@@ -158,7 +159,7 @@ function build(mobile: boolean) {
         const nc = NODES[node.name]
         const anim = nodeAnim.get(node.name)
         if (!nc || !anim) return
-        const offset = k * (step.stagger ?? 0.1) + (nc.delay ?? 0)
+        const offset = k * (step.stagger ?? 0.1)
         const start = i + T.exitStart + offset
         const p = poses(nc)
         tl.fromTo(anim, ZERO, { ...p.lift, duration: T.lift, ease: 'power2.inOut', immediateRender: false }, start)
@@ -218,7 +219,7 @@ function build(mobile: boolean) {
 /** Crea la timeline maestra (re-construida al cruzar el breakpoint móvil). Devuelve cleanup. */
 export function setupTimeline(): () => void {
   const mm = gsap.matchMedia()
-  mm.add('(max-width: 767px)', () => build(true))
-  mm.add('(min-width: 768px)', () => build(false))
+  mm.add(MOBILE_QUERY, () => build(true))
+  mm.add(`not all and ${MOBILE_QUERY}`, () => build(false))
   return () => mm.revert()
 }

@@ -187,7 +187,6 @@ button {
     inset 0 1px 0 rgba(255, 255, 255, 0.07);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   backdrop-filter: blur(18px) saturate(140%);
-  visibility: hidden;
   opacity: 0;
   will-change: transform, opacity;
 }
@@ -312,7 +311,8 @@ button {
   justify-content: flex-end;
   gap: 10px;
   width: 100%;
-  padding: 5px 4px;
+  min-height: 24px;
+  padding: 3px 4px;
   background: none;
   border: 0;
   cursor: pointer;
@@ -536,13 +536,30 @@ button {
     right: 10px;
     bottom: 10px;
     width: auto;
-    max-height: 56vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 14px 16px 12px;
+    max-height: 52vh;
+    overflow: hidden;
+    padding: 12px 14px 10px;
     border-radius: 18px;
-    pointer-events: none;
+    /* backdrop-filter es caro en GPU móvil: fondo casi opaco en su lugar */
+    background: rgba(10, 13, 22, 0.88);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
+  /* El contenido del bottom sheet debe caber siempre (no se puede desplazar: no captura el scroll de la página) */
+  .panel .datos {
+    display: none;
+  }
+  .panel h3 + p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+  .panel li:nth-child(n + 3) {
+    display: none;
+  }
+
   .panel__num {
     font-size: 1.4rem;
   }
@@ -581,16 +598,158 @@ button {
   .pnav {
     right: 4px;
   }
+  /* Sin etiqueta visible, pero accesible (el botón conserva su nombre) */
   .pnav__label {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    opacity: 1;
+    translate: none;
   }
   .pnav button {
-    padding: 3px 4px;
+    width: 24px;
+    min-height: 24px;
+    padding: 0;
+    justify-content: center;
   }
   .pnav__dot {
     width: 6px;
     height: 6px;
   }
+}
+
+/* ---------- Ventanas bajas (escritorio apaisado, móvil horizontal) ---------- */
+@media (max-height: 600px) {
+  .panel,
+  .panel[data-side] {
+    max-height: 84vh;
+    padding: 12px 16px 10px;
+  }
+  .panel[data-side='center'] {
+    bottom: 4vh;
+  }
+  .panel h2 {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+  .panel__top {
+    margin-bottom: 4px;
+  }
+  .panel__num {
+    font-size: 1.3rem;
+  }
+  .panel h3 {
+    margin: 6px 0 1px;
+    font-size: 0.62rem;
+  }
+  .panel p,
+  .panel li {
+    font-size: 0.76rem;
+    line-height: 1.3;
+  }
+  .panel ul {
+    gap: 0;
+  }
+  .panel .datos {
+    display: none;
+  }
+  .panel h3 + p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+  .panel li:nth-child(n + 3) {
+    display: none;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 8vh, 3.4rem);
+  }
+  .hero {
+    gap: 10px;
+  }
+  .pnav button {
+    min-height: 24px;
+  }
+}
+
+/* Táctil: sin desenfoque de fondo en los paneles */
+@media (pointer: coarse) {
+  .panel {
+    background: rgba(10, 13, 22, 0.88);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ---------- Sin escena 3D (WebGL no disponible o fallo de carga): contenido como texto ---------- */
+.notice {
+  position: relative;
+  z-index: 30;
+  margin: 0;
+  padding: 10px 24px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: rgba(94, 231, 255, 0.12);
+  border-bottom: 1px solid rgba(94, 231, 255, 0.35);
+}
+.no-3d .stage,
+.no-3d .vignette,
+.no-3d .track {
+  display: none;
+}
+.no-3d .overlay {
+  position: static;
+  pointer-events: auto;
+  display: grid;
+  gap: 20px;
+  padding: 8vh clamp(16px, 6vw, 96px) 6vh;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.no-3d .hero,
+.no-3d .panel,
+.no-3d .panel[data-side] {
+  position: static;
+  inset: auto;
+  margin: 0;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  opacity: 1 !important;
+  transform: none !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(13, 17, 28, 0.9);
+  text-align: left;
+}
+.no-3d .hero {
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+.no-3d .panel .datos {
+  display: flex;
+}
+.no-3d .panel h3 + p {
+  display: block;
+}
+.no-3d .panel li,
+.no-3d .panel li:nth-child(n + 3) {
+  display: list-item;
+}
+.no-3d .cta-scroll {
+  display: none;
+}
+.no-3d .outro {
+  min-height: 0;
+  padding-top: 6vh;
 }
 
 /* ---------- Movimiento reducido ---------- */

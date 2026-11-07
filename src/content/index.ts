@@ -1,2 +1,2 @@
 // Único punto de entrada del contenido.
-export { PIEZAS } from './piezas'
+export { PIEZAS, HERO, EXPLOSIONADA, REMONTAJE, FINAL } from './piezas'

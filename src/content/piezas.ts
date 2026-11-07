@@ -213,28 +213,30 @@ export const PIEZAS: PiezaContenido[] = [
 ]
 
 export const HERO = {
-  titulo: 'Dentro de un PC',
+  eyebrow: 'Un recorrido 3D por scroll',
+  tituloA: 'Un PC por dentro,',
+  tituloB: 'pieza a pieza.',
   subtitulo:
-    'Diez piezas, una máquina: desmontamos un ordenador de sobremesa para ver qué hace cada componente y por qué importa.',
-  cta: 'Haz scroll para desmontarlo',
+    'Desmontamos un ordenador de sobremesa completo para que veas qué hace cada componente y qué mirar antes de comprarlo.',
+  cta: 'Haz scroll',
 }
 
 export const EXPLOSIONADA = {
   titulo: 'Vista explosionada',
-  texto:
-    'Todas las piezas separadas, en el orden en que se montan. Cada una cumple una función, pero ninguna trabaja sola.',
+  texto: 'Todas las piezas, flotando en el orden en que las has visto salir.',
 }
 
 export const REMONTAJE = {
-  titulo: 'Volvemos a montarlo',
-  texto:
-    'Cada componente regresa a su sitio, desde la caja hasta el cristal. Así se convierte un montón de piezas en un ordenador.',
+  titulo: 'Y ahora, a montarlo',
+  texto: 'Cada componente vuelve a su sitio, en orden inverso.',
 }
 
 export const FINAL = {
-  titulo: 'Diez piezas, una máquina',
-  texto:
-    'Un PC es la suma de componentes que se complementan: potencia, memoria, almacenamiento, energía y refrigeración. Entender qué hace cada uno te ayuda a elegir mejor y a no gastar de más.',
-  ctaPrimario: 'Volver a empezar',
-  ctaSecundario: 'Ver las piezas',
+  eyebrow: 'Resumen',
+  tituloA: 'Diez piezas,',
+  tituloB: 'un solo equipo.',
+  texto: 'Ahora sabes qué hace cada componente y en qué fijarte al elegirlo. Este es el recorrido completo.',
+  ctaPrimario: 'Vuelve a montarlo',
+  ctaSecundario: 'Configura tu PC',
+  nota: 'Próximamente: un configurador para elegir tus propias piezas.',
 }
