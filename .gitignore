@@ -30,3 +30,4 @@ assets-src/hdri/*.exr
 .venv/
 
 assets-src/*.glb
+__pycache__/

@@ -2,23 +2,24 @@
 // Uso: npm run assets:optimize
 import { NodeIO } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
-import { dedup, prune, weld, reorder, quantize, meshopt, textureCompress } from '@gltf-transform/functions';
+import { dedup, prune, weld, meshopt, textureCompress } from '@gltf-transform/functions';
 import { MeshoptEncoder, MeshoptDecoder } from 'meshoptimizer';
 import sharp from 'sharp';
-import { statSync, mkdirSync } from 'node:fs';
+import { statSync, mkdirSync, renameSync, rmSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const INPUT = resolve(ROOT, 'assets-src/pc_raw.glb');
 const OUT_DIR = resolve(ROOT, 'public/models');
-const MAX_DESKTOP_BYTES = 15 * 1024 * 1024;
+// Materiales que la web ajusta por nombre en runtime (src/scene/PCModel.tsx)
+const REQUIRED_MATERIALS = ['M_Glass_Tempered', 'M_Mesh_Hex'];
 const REQUIRED = ['Case', 'GlassPanel', 'FanFront1', 'FanFront2', 'FanFront3', 'FanRear', 'GPU', 'CablePCIe',
   'CPUCooler', 'CPU', 'ThermalPaste', 'RAM1', 'RAM2', 'RAM3', 'RAM4', 'SSD', 'SSDHeatsink', 'PSU',
   'Cable24Pin', 'CableEPS', 'Motherboard'];
 const VARIANTS = [
-  { name: 'desktop', file: 'pc.glb', maxTex: 2048 },
-  { name: 'mobile', file: 'pc-mobile.glb', maxTex: 1024 },
+  { name: 'desktop', file: 'pc.glb', maxTex: 2048, maxBytes: 15 * 1024 * 1024 },
+  { name: 'mobile', file: 'pc-mobile.glb', maxTex: 1024, maxBytes: 8 * 1024 * 1024 },
 ];
 
 await MeshoptEncoder.ready;
@@ -37,30 +38,28 @@ async function build({ maxTex, file }) {
     textureCompress({ encoder: sharp, targetFormat: 'webp', resize, slots, quality });
 
   await doc.transform(
-    dedup(),
+    // keepUniqueNames: no fusiona materiales con nombre distinto (la web busca algunos por nombre)
+    dedup({ keepUniqueNames: true }),
     // keepLeaves: no borra nodos vacios (ni con nombre); keepExtras conserva userData
     prune({ keepLeaves: true, keepExtras: true }),
     weld(),
-    reorder({ encoder: MeshoptEncoder }),
-    // Defaults conservadores: pos 14 bit, normal 8 bit, texcoord 12 bit. Volumen por malla
-    // (las mallas compartidas siguen siendo la misma malla; el nodo lleva la dequantizacion).
-    // OJO: la dequantizacion mueve el origen de cada nodo hoja al centro de su caja envolvente
-    // (meshopt() cuantiza POSITION siempre). La web solo usa offsets relativos, asi que es inocuo;
-    // los giros de la coreografia pivotan sobre ese centro.
-    quantize(),
     // Normal maps: calidad alta para evitar bandas
     tc(/^normalTexture$/, 92),
     // Metal-rugosidad y oclusion
     tc(/^(metallicRoughness|occlusion)Texture$/, 85),
     // Color y emisivas
     tc(/^(baseColor|emissive)Texture$/, 82),
+    // meshopt() ya hace reorder + quantize (pos 14 bit, normal 8, texcoord 12) antes de comprimir.
+    // OJO: la dequantizacion mueve el origen de cada nodo hoja al centro de su caja envolvente.
+    // La web solo usa offsets relativos, asi que es inocuo; los giros pivotan sobre ese centro.
     meshopt({ encoder: MeshoptEncoder, level: 'medium' }),
   );
 
   mkdirSync(OUT_DIR, { recursive: true });
-  const out = resolve(OUT_DIR, file);
-  await io.write(out, doc);
-  return out;
+  // Se escribe a un temporal; solo sustituye al GLB publicado si pasa la validacion
+  const tmp = resolve(OUT_DIR, file + '.tmp.glb');
+  await io.write(tmp, doc);
+  return tmp;
 }
 
 function stats(doc) {
@@ -113,30 +112,44 @@ function report(label, inSize, outPath, doc) {
 
 const inSize = statSync(INPUT).size;
 let failed = false;
+let inputNodeNames = new Set();
+let inputMeshCount = 0;
 
 {
   const src = await io.read(INPUT);
   const s = stats(src);
   console.log(`Entrada ${INPUT}: ${mb(inSize)}, ${src.getRoot().listMeshes().length} mallas, ${Math.round(s.tris)} tris unicos / ${Math.round(s.drawn)} dibujados`);
-  var inputNodeNames = new Set(src.getRoot().listNodes().map((n) => n.getName()));
-  var inputMeshCount = src.getRoot().listMeshes().length;
+  inputNodeNames = new Set(src.getRoot().listNodes().map((n) => n.getName()));
+  inputMeshCount = src.getRoot().listMeshes().length;
 }
 
 for (const v of VARIANTS) {
-  const out = await build(v);
+  const tmp = await build(v);
+  let ok = true;
   // Re-lectura con decoder para verificar que el archivo es valido y conserva nombres
-  const re = await io.read(out);
-  const { tops } = report(`${v.name} (texturas max ${v.maxTex}px)`, inSize, out, re);
+  const re = await io.read(tmp);
+  const { tops } = report(`${v.name} (texturas max ${v.maxTex}px)`, inSize, tmp, re);
   const outNames = new Set(re.getRoot().listNodes().map((n) => n.getName()));
   const lost = [...inputNodeNames].filter((n) => !outNames.has(n));
-  if (lost.length) { warnings.push(`${v.name}: nodos perdidos: ${lost.join(', ')}`); failed = true; }
+  if (lost.length) { console.error(`${v.name}: nodos perdidos: ${lost.join(', ')}`); ok = false; }
   if (re.getRoot().listMeshes().length > inputMeshCount) warnings.push(`${v.name}: mas mallas que en la entrada (se perdio el compartido?)`);
   const missing = REQUIRED.filter((n) => !tops.includes(n));
-  if (missing.length) { console.error(`FALTAN nodos de primer nivel (${v.name}): ${missing.join(', ')}`); failed = true; }
-  if (v.name === 'desktop' && statSync(out).size > MAX_DESKTOP_BYTES) {
-    console.error(`El GLB de escritorio supera 15 MB (${mb(statSync(out).size)})`); failed = true;
+  if (missing.length) { console.error(`FALTAN nodos de primer nivel (${v.name}): ${missing.join(', ')}`); ok = false; }
+  const matNames = new Set(re.getRoot().listMaterials().map((m) => m.getName()));
+  const missingMats = REQUIRED_MATERIALS.filter((n) => !matNames.has(n));
+  if (missingMats.length) { console.error(`FALTAN materiales (${v.name}): ${missingMats.join(', ')}`); ok = false; }
+  if (statSync(tmp).size > v.maxBytes) {
+    console.error(`El GLB ${v.name} supera ${mb(v.maxBytes)} (${mb(statSync(tmp).size)})`); ok = false;
   }
-  console.log(`Re-lectura OK (NodeIO + MeshoptDecoder), nombres conservados: ${lost.length === 0}`);
+  const out = resolve(OUT_DIR, v.file);
+  if (ok) {
+    renameSync(tmp, out);
+    console.log(`OK -> ${out} (re-lectura con MeshoptDecoder, nombres conservados)`);
+  } else {
+    rmSync(tmp, { force: true });
+    console.error(`${v.name}: NO se sustituye ${out} (se conserva el anterior)`);
+    failed = true;
+  }
 }
 
 if (warnings.length) console.warn('\nAdvertencias:\n' + warnings.map((w) => '  ! ' + w).join('\n'));

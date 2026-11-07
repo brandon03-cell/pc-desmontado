@@ -8,7 +8,11 @@
  *   (Blender es Z-up: three(x, y, z) = blender(x, z, -y); el exportador glTF lo convierte.)
  *
  * Cada pieza es un nodo de primer nivel en el GLB con el nombre exacto de `nodes`.
- * El origen de cada nodo está en su punto de montaje lógico (p. ej. la GPU en su conector PCIe).
+ * En Blender, el origen de cada nodo está en su punto de montaje lógico (p. ej. la GPU en su
+ * conector PCIe). OJO: la cuantización de meshopt (tools/optimize-glb.mjs) mueve el origen de los
+ * nodos hoja al centro de su caja envolvente. La web solo usa offsets relativos al transform
+ * `assembled`, así que no afecta; las rotaciones de la coreografía pivotan sobre ese centro.
+ * La lista de nodos también está en blender/scripts/export_glb.py y tools/optimize-glb.mjs.
  * Hijos animables: "<Pieza>_Rotor" (FanFront1_Rotor…, FanRear_Rotor, CPUCooler_Rotor,
  * GPU_Fan1..3_Rotor, PSU_Fan_Rotor) son las aspas; giran sobre su eje local: Z para los
  * ventiladores de caja y del disipador, Y para los de la GPU y la PSU.
