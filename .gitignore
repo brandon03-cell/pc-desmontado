@@ -29,3 +29,4 @@ blender/renders/tmp/
 assets-src/hdri/*.exr
 .venv/
 
+assets-src/*.glb
