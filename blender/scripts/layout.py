@@ -17,7 +17,7 @@ MB_Y0 = 0.212     # borde trasero
 MB_Z0 = 0.445     # borde superior
 
 # Rectángulos (u0, v0, u1, v1) en mm
-IO_SHROUD = (0.0, 4.0, 30.0, 162.0)
+IO_SHROUD = (-12.0, 4.0, 30.0, 162.0)   # cubre los puertos hasta el escudo I/O
 VRM_TOP = (52.0, 11.0, 150.0, 34.0)
 VRM_REAR = (31.0, 11.0, 51.0, 128.0)
 EPS = [(34.0, 1.5, 52.0, 9.5), (56.0, 1.5, 74.0, 9.5)]

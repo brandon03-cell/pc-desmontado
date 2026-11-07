@@ -14,7 +14,22 @@ TOP = ["Case", "GlassPanel", "FanFront1", "FanFront2", "FanFront3", "FanRear", "
        "PSU", "Cable24Pin", "CableEPS", "Motherboard"]
 
 
+EXPECTED = {"Case": (0.0, 0.0, 0.0), "CPU": (0.083, 0.094, 0.367), "GPU": (0.082, 0.1255, 0.2735), "PSU": (0.0, 0.145, 0.0595)}
+
+
+def check_positions(tol=0.002):
+    """Evita exportar si alguien ha movido piezas a mano en la interfaz (los scripts son la fuente de verdad)."""
+    bad = []
+    for n, p in EXPECTED.items():
+        loc = bpy.data.objects[n].location
+        if any(abs(loc[i] - p[i]) > tol for i in range(3)):
+            bad.append(f"{n} en {tuple(round(v, 3) for v in loc)} (esperado {p})")
+    if bad:
+        raise RuntimeError("Piezas movidas; ejecuta build() antes de exportar: " + "; ".join(bad))
+
+
 def export(path=OUT):
+    check_positions()
     for o in bpy.context.view_layer.objects:
         o.select_set(False)
     sel = []
