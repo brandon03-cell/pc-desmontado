@@ -5,10 +5,9 @@ import * as THREE from 'three'
 import { ALL_NODE_NAMES } from './parts'
 import { NODES } from './choreography'
 import { nodeAnim, readyStore, sceneState, type NodeAnim } from './animationState'
+import { glbUrlFor } from './device'
 import { usePlaceholderRoot } from './Placeholders'
 
-export const GLB_URL = '/models/pc.glb'
-export const GLB_MOBILE_URL = '/models/pc-mobile.glb'
 
 interface RigItem {
   obj: THREE.Object3D
@@ -53,6 +52,17 @@ const _v = new THREE.Vector3()
 const TWO_PI = Math.PI * 2
 const AXIS = { y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) }
 
+/**
+ * Transform original del nodo, guardado una sola vez en userData: la escena de useGLTF está cacheada y
+ * se muta cada frame, así que al remontar (cambio de breakpoint, HMR) leerla de nuevo daría piezas desplazadas.
+ */
+function home(obj: THREE.Object3D) {
+  const u = obj.userData as { p0?: THREE.Vector3; q0?: THREE.Quaternion }
+  u.p0 ??= obj.position.clone()
+  u.q0 ??= obj.quaternion.clone()
+  return { p0: u.p0, q0: u.q0 }
+}
+
 const isHome = (a: NodeAnim) =>
   Math.abs(a.x) + Math.abs(a.y) + Math.abs(a.z) < 1e-4 && Math.abs(a.rx) + Math.abs(a.ry) + Math.abs(a.rz) < 1e-4
 
@@ -77,17 +87,23 @@ function smokedGlass(src: THREE.MeshStandardMaterial) {
 
 /** Ajustes de materiales en runtime (los del GLB vienen de Blender). `hq`: escritorio. */
 function tuneMaterials(root: THREE.Object3D, hq: boolean) {
+  const glass = new Map<THREE.Material, THREE.Material>()
   root.traverse((o) => {
     const mesh = o as THREE.Mesh
-    if (!mesh.isMesh) return
+    // La escena de useGLTF está cacheada y se reutiliza al remontar: no tocar dos veces (ni recrear el cristal)
+    if (!mesh.isMesh || mesh.userData.tuned) return
+    mesh.userData.tuned = true
     mesh.castShadow = true
     mesh.receiveShadow = true
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
     for (const m of mats as THREE.MeshStandardMaterial[]) {
       if (m.name === 'M_Glass_Tempered') {
         // Cristal: sin escribir profundidad (no tapa el interior ni el AO), dibujado al final
-        if (hq) mesh.material = smokedGlass(m)
-        else {
+        if (hq) {
+          let g = glass.get(m)
+          if (!g) glass.set(m, (g = smokedGlass(m)))
+          mesh.material = g
+        } else {
           m.depthWrite = false
           m.side = THREE.FrontSide
           m.envMapIntensity = 1.6
@@ -102,6 +118,8 @@ function tuneMaterials(root: THREE.Object3D, hq: boolean) {
       }
     }
   })
+  // Materiales de cristal sustituidos: liberar los originales
+  glass.forEach((_, src) => src.dispose())
 }
 
 /** Amplitud (rad) del vaivén del hero: ±50° */
@@ -125,7 +143,8 @@ function Rig({ root, hq }: { root: THREE.Object3D; hq: boolean }) {
         missing.push(name)
         continue
       }
-      out.push({ obj, p0: obj.position.clone(), q0: obj.quaternion.clone(), anim })
+      const { p0, q0 } = home(obj)
+      out.push({ obj, p0, q0, anim })
     }
     for (const it of out) {
       const pv = NODES[it.obj.name]?.pivot
@@ -144,7 +163,7 @@ function Rig({ root, hq }: { root: THREE.Object3D; hq: boolean }) {
       const obj = root.getObjectByName(r.name)
       const part = nodeAnim.get(r.part)
       if (!obj || !part) continue
-      out.push({ obj, q0: obj.quaternion.clone(), axis: AXIS[r.axis], part, rps: r.rps, dir: r.dir })
+      out.push({ obj, q0: home(obj).q0, axis: AXIS[r.axis], part, rps: r.rps, dir: r.dir })
     }
     return out
   }, [root])
@@ -193,6 +212,7 @@ function Rig({ root, hq }: { root: THREE.Object3D; hq: boolean }) {
     const target = active ? HERO_SWING * Math.sin(heroPhase.current) : 0
     spin.current = THREE.MathUtils.damp(spin.current, target, active ? 3 : 4, dt)
     g.rotation.y = spin.current
+    sceneState.spin = spin.current
   })
 
   return (
@@ -213,6 +233,6 @@ function PlaceholderModel() {
   return <Rig root={root} hq={false} />
 }
 
-export function PCModel({ mode, mobile }: { mode: 'glb' | 'placeholder'; mobile: boolean }) {
-  return mode === 'glb' ? <GLBModel url={mobile ? GLB_MOBILE_URL : GLB_URL} hq={!mobile} /> : <PlaceholderModel />
+export function PCModel({ mode, mobile, lowPower }: { mode: 'glb' | 'placeholder'; mobile: boolean; lowPower: boolean }) {
+  return mode === 'glb' ? <GLBModel url={glbUrlFor(mobile)} hq={!lowPower} /> : <PlaceholderModel />
 }
