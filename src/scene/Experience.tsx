@@ -93,8 +93,11 @@ export default function Experience() {
           shadow-bias={-0.0004}
           shadow-normalBias={0.002}
         />
-        <directionalLight position={[-1.2, 0.6, -1.4]} intensity={0.6} color="#8fa8ff" />
-        <PCModel mode={mode} />
+        {/* Relleno suave desde el lado del cristal: que el interior negro no quede empastado */}
+        <directionalLight position={[-1.6, 0.7, 0.4]} intensity={0.55} color="#e6edff" />
+        {/* Rim frío desde atrás */}
+        <directionalLight position={[-1.2, 0.6, -1.4]} intensity={0.7} color="#8fa8ff" />
+        <PCModel mode={mode} mobile={mobile} />
         <ContactShadows
           position={[0, 0.001, 0]}
           opacity={0.65}
