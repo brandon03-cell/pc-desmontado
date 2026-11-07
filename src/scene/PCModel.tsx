@@ -96,14 +96,6 @@ function tuneMaterials(root: THREE.Object3D, hq: boolean) {
         mesh.renderOrder = 10
         mesh.castShadow = false
         mesh.receiveShadow = false
-      } else if (m.name === 'M_Label_SSD') {
-        // El GLB actual trae la etiqueta del SSD fuera de sitio (junto al suelo, fuera de la caja)
-        root.updateMatrixWorld(true)
-        const c = new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3())
-        if (c.y < 0.2) {
-          mesh.visible = false
-          console.warn('[PCModel] Etiqueta del SSD fuera de su sitio en el GLB: oculta')
-        }
       } else if (m.name === 'M_Mesh_Hex') {
         // Malla perforada (MASK): que no proyecte una sombra opaca sobre el interior
         mesh.castShadow = false

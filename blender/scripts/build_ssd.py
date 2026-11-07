@@ -25,12 +25,11 @@ def build(M, coll):
     for k in range(2):
         P.append(mb("s_nand", u0 + 37 + k * 20, vc - 7, u0 + 55 + k * 20, vc + 7, H0 + 0.8, H0 + 2.0, M, M["chip"], coll, bevel=0.2))
     # etiqueta (cubre los chips como en los SSD reales)
-    lbl = lib.plane("s_label", 0.072, 0.0216, W((u0 + u1) / 2 + 1.5, vc, H0 + 2.06), "X-", M["ssd_label"], coll)
-    lbl.data.transform(__import__("mathutils").Matrix.Rotation(3.14159265, 4, "X"))
-    lbl.location = W((u0 + u1) / 2 + 1.5, vc, H0 + 2.06)
-    lib.apply_mods(lbl)
-    lbl.data.transform(lbl.matrix_basis)
-    lbl.matrix_basis.identity()
+    # plano en el origen, girado 180° (texto legible desde el cristal) y luego llevado a su sitio
+    from mathutils import Matrix
+    lbl = lib.plane("s_label", 0.072, 0.0216, (0, 0, 0), "X-", M["ssd_label"], coll)
+    lbl.data.transform(Matrix.Rotation(3.14159265, 4, "X"))
+    lbl.data.transform(Matrix.Translation(W((u0 + u1) / 2 + 1.5, vc, H0 + 2.06)))
     P.append(lbl)
     ssd = join(P, "SSD")
     set_origin(ssd, W(u0, vc, H0))

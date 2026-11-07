@@ -23,7 +23,7 @@ def build():
     M["fan_blade_rgb"] = mat("M_Fan_Blade_Frost", (0.8, 0.82, 0.86), 0.0, 0.42, emission=(0.35, 0.3, 0.9), emission_strength=0.12)
     M["fan_blade_black"] = mat("M_Fan_Blade_Black", (0.025, 0.025, 0.028), 0.0, 0.45)
     M["rgb"] = mat("M_RGB_Ring", (0.9, 0.9, 0.95), 0.0, 0.3, emission_tex="rgb_ring.png", emission_strength=6.0)
-    M["rgb_white"] = mat("M_RGB_White", (0.9, 0.9, 0.95), 0.0, 0.3, emission=(0.75, 0.85, 1.0), emission_strength=4.0)
+    M["rgb_white"] = mat("M_RGB_White", (0.9, 0.9, 0.95), 0.0, 0.3, emission=(0.75, 0.85, 1.0), emission_strength=1.6)
     # Metales
     M["alu"] = mat("M_Alu_Brushed", (0.9, 0.91, 0.92), 1.0, 0.3, mr_tex="brushed_mr.png", normal_tex="brushed_normal.png", normal_strength=0.35)
     M["alu_dark"] = mat("M_Alu_Gunmetal", (0.2, 0.205, 0.215), 1.0, 0.36, mr_tex="brushed_mr.png", normal_tex="brushed_normal.png", normal_strength=0.3)

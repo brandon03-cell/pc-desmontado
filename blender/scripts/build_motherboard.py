@@ -257,7 +257,7 @@ def build(M, coll):
         for k in range(tubes):
             uu = u0 + w * (k + 0.5) / tubes
             hh = 12.0 + (k % 2) * 0.4
-            pts = [W(uu, 302.5, hh), W(uu, 319, hh), W(uu, 319, -14), W(uu + 6, 319, -14)]
+            pts = [W(uu, 302.5, hh), W(uu, 319, hh), W(uu, 319, -4)]
             P.append(lib.poly_tube("hdr_w", pts, r / 1000, M["sleeve"], coll, bend_r=0.006, res=5, bevel_res=2))
     for (u, cols, kind) in L.BOTTOM_HDRS:
         if kind == "usb3":

@@ -27,7 +27,11 @@ def export(path=OUT):
             c.hide_set(False)
             c.select_set(True)
     bpy.context.view_layer.objects.active = sel[0]
-    kw = dict(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True,
+    # Solo la escena del PC: el archivo puede contener otras escenas ajenas al proyecto
+    pc_scene = bpy.data.scenes["Scene"]
+    if bpy.context.window is not None and bpy.context.window.scene != pc_scene:
+        bpy.context.window.scene = pc_scene
+    kw = dict(filepath=path, export_format="GLB", use_selection=True, use_active_scene=True, export_apply=True, export_yup=True,
               export_texcoords=True, export_normals=True, export_tangents=False, export_materials="EXPORT",
               export_image_format="AUTO", export_cameras=False, export_lights=False, export_extras=False,
               export_animations=False, export_draco_mesh_compression_enable=False)

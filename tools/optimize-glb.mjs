@@ -44,6 +44,9 @@ async function build({ maxTex, file }) {
     reorder({ encoder: MeshoptEncoder }),
     // Defaults conservadores: pos 14 bit, normal 8 bit, texcoord 12 bit. Volumen por malla
     // (las mallas compartidas siguen siendo la misma malla; el nodo lleva la dequantizacion).
+    // OJO: la dequantizacion mueve el origen de cada nodo hoja al centro de su caja envolvente
+    // (meshopt() cuantiza POSITION siempre). La web solo usa offsets relativos, asi que es inocuo;
+    // los giros de la coreografia pivotan sobre ese centro.
     quantize(),
     // Normal maps: calidad alta para evitar bandas
     tc(/^normalTexture$/, 92),
@@ -87,7 +90,7 @@ function stats(doc) {
 
 function report(label, inSize, outPath, doc) {
   const root = doc.getRoot();
-  const scene = root.listScenes()[0];
+  const scene = root.getDefaultScene() ?? root.listScenes()[0];
   const tops = scene.listChildren();
   const normalTex = new Set(root.listMaterials().map((m) => m.getNormalTexture()).filter(Boolean));
   console.log(`\n=== ${label} ===`);
@@ -115,7 +118,6 @@ let failed = false;
   const src = await io.read(INPUT);
   const s = stats(src);
   console.log(`Entrada ${INPUT}: ${mb(inSize)}, ${src.getRoot().listMeshes().length} mallas, ${Math.round(s.tris)} tris unicos / ${Math.round(s.drawn)} dibujados`);
-  const inNames = new Set(src.getRoot().listScenes()[0].listChildren().map((n) => n.getName()));
   var inputNodeNames = new Set(src.getRoot().listNodes().map((n) => n.getName()));
   var inputMeshCount = src.getRoot().listMeshes().length;
 }
