@@ -1,14 +1,13 @@
 import { useSyncExternalStore } from 'react'
 import { STEPS } from '../scene/choreography'
 import { stepStore } from '../scene/animationState'
-import { scrollToEl, scrollToY } from '../scroll/useLenis'
+import { scrollTo } from '../scroll/useLenis'
 import { stepScrollY } from '../scroll/timeline'
 
 function goTo(i: number, kind: string) {
   // El paso 'outro' queda justo antes de que aparezca el resumen: se va al propio elemento
   const el = kind === 'outro' ? document.getElementById('resumen') : null
-  if (el) scrollToEl(el)
-  else scrollToY(stepScrollY(i))
+  scrollTo(el ?? stepScrollY(i))
 }
 
 /** Indicador lateral de pasos. Clicable: salta al paso con Lenis. */

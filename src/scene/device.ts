@@ -7,38 +7,27 @@ import { useSyncExternalStore } from 'react'
  *                backdrop-filter). Es `mobile` o puntero táctil (tabletas), aunque tengan layout de escritorio.
  */
 export const MOBILE_QUERY = '(max-width: 767px)'
-export const COARSE_QUERY = '(pointer: coarse)'
+/** Móvil O puntero táctil (la coma en una media query equivale a "o") */
+const LOW_POWER_QUERY = `${MOBILE_QUERY}, (pointer: coarse)`
 
 export const isMobileNow = () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
-export const isLowPowerNow = () =>
-  typeof window !== 'undefined' && (isMobileNow() || window.matchMedia(COARSE_QUERY).matches)
 
+/** Hook que devuelve si `query` se cumple, y re-renderiza cuando cambia. */
 function mediaHook(query: string) {
   const subscribe = (cb: () => void) => {
     const mq = window.matchMedia(query)
     mq.addEventListener('change', cb)
     return () => mq.removeEventListener('change', cb)
   }
-  return () =>
-    useSyncExternalStore(
-      subscribe,
-      () => window.matchMedia(query).matches,
-      () => false,
-    )
+  const get = () => window.matchMedia(query).matches
+  return () => useSyncExternalStore(subscribe, get, () => false)
 }
 
 export const useIsMobile = mediaHook(MOBILE_QUERY)
-const useIsCoarse = mediaHook(COARSE_QUERY)
-export const useIsLowPower = () => {
-  const m = useIsMobile()
-  const c = useIsCoarse()
-  return m || c
-}
+export const useIsLowPower = mediaHook(LOW_POWER_QUERY)
 
-export const GLB_URL = '/models/pc.glb'
-export const GLB_MOBILE_URL = '/models/pc-mobile.glb'
 export const HDRI_URL = '/hdri/studio_1k.hdr'
-export const glbUrlFor = (mobile: boolean) => (mobile ? GLB_MOBILE_URL : GLB_URL)
+export const glbUrlFor = (mobile: boolean) => (mobile ? '/models/pc-mobile.glb' : '/models/pc.glb')
 
 /** En producción: empieza a descargar el GLB adecuado y el HDRI en cuanto carga la app (antes del chunk 3D). */
 export function warmAssets() {

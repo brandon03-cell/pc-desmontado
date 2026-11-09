@@ -13,7 +13,7 @@
  * planos. En el paso 'explode' todas bajan a la vez a `exploded`.
  */
 import type { PartId, Vec3 } from './parts'
-import { PARTS } from './parts'
+import { ALL_NODES, PARTS } from './parts'
 import { EXPLOSIONADA, REMONTAJE } from '../content/piezas'
 
 export interface CamKey {
@@ -85,13 +85,12 @@ export const TIMING = {
   shiftX: 0.16,
 }
 
-const HERO: CamKey = { pos: [-1.15, 0.55, 1.5], target: [0, 0.24, 0] }
-export const HERO_CAM = HERO
+export const HERO_CAM: CamKey = { pos: [-1.15, 0.55, 1.5], target: [0, 0.24, 0] }
 
 const EXPLODE_CAM: CamKey = { pos: [-1.96, 1.38, 2.52], target: [0.02, 0.66, 0], mobileDolly: 0.8 }
 
 export const STEPS: StepDef[] = [
-  { id: 'hero', label: 'Inicio', kind: 'hero', cam: HERO },
+  { id: 'hero', label: 'Inicio', kind: 'hero', cam: HERO_CAM },
   {
     id: 'glass',
     label: 'Cristal',
@@ -207,14 +206,19 @@ const len = Math.hypot(fwd[0], fwd[2])
 const RIGHT: Vec3 = [-fwd[2] / len, 0, fwd[0] / len]
 const DEPTH: Vec3 = [fwd[0] / len, 0, fwd[2] / len]
 
-const center = (name: string): Vec3 => {
-  for (const p of PARTS) for (const n of p.nodes) if (n.name === name) return n.approx.center
-  return [0, 0, 0]
-}
 /** Offset que lleva el centro del nodo `ref` a (u, y, d) en el plano de la cámara explosionada. */
 const at = (ref: string, u: number, y: number, d = 0): Vec3 => {
-  const c = center(ref)
+  const c = ALL_NODES.find((n) => n.name === ref)?.approx.center ?? [0, 0, 0]
   return [u * RIGHT[0] + d * DEPTH[0] - c[0], y - c[1], u * RIGHT[2] + d * DEPTH[2] - c[2]]
+}
+
+/** Trayectoria del CPU: la pasta térmica la comparte (y gira alrededor del CPU). */
+const CPU_PATH: NodeChoreo = {
+  lift: [-0.012, 0, 0],
+  via: [-0.2, 0.0, 0.03],
+  viaRot: [0, 35, 0],
+  exploded: at('CPU', 0.64, 0.86),
+  explodedRot: [0, 50, 0],
 }
 
 /**
@@ -251,15 +255,8 @@ export const NODES: Record<string, NodeChoreo> = {
   CPUCooler: { lift: [-0.03, 0, 0], via: [-0.2, 0.01, 0.02], exploded: at('CPUCooler', 0.42, 1.02), explodedRot: [0, 25, 0] },
 
   // 5 · CPU (con su pasta): se levanta del socket (-X) y gira para enseñar la pasta
-  CPU: { lift: [-0.012, 0, 0], via: [-0.2, 0.0, 0.03], viaRot: [0, 35, 0], exploded: at('CPU', 0.64, 0.86), explodedRot: [0, 50, 0] },
-  ThermalPaste: {
-    lift: [-0.012, 0, 0],
-    via: [-0.2, 0.0, 0.03],
-    viaRot: [0, 35, 0],
-    exploded: at('CPU', 0.64, 0.86),
-    explodedRot: [0, 50, 0],
-    pivot: 'CPU',
-  },
+  CPU: CPU_PATH,
+  ThermalPaste: { ...CPU_PATH, pivot: 'CPU' },
 
   // 6 · RAM: los 4 módulos salen perpendiculares a la placa (-X)
   RAM1: { lift: [-0.03, 0, 0], via: [-0.2, 0.01, 0], exploded: at('RAM1', 0.52, 0.6), explodedRot: [0, -25, 0] },

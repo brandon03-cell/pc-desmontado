@@ -10,19 +10,15 @@ let lenis: Lenis | null = null
 
 export const getLenis = () => lenis
 
-/** Scroll suave a una posición (px). Respeta prefers-reduced-motion. */
-export function scrollToY(y: number, duration = 1.8) {
-  if (lenis) lenis.scrollTo(y, { duration, lock: false })
-  else window.scrollTo({ top: y, behavior: sceneState.reducedMotion ? 'auto' : 'smooth' })
+/** Scroll suave a una posición (px) o hasta un elemento. Respeta prefers-reduced-motion. */
+export function scrollTo(target: number | HTMLElement, duration = 1.8) {
+  if (lenis) return lenis.scrollTo(target, { duration, lock: false })
+  const behavior = sceneState.reducedMotion ? 'auto' : 'smooth'
+  if (typeof target === 'number') window.scrollTo({ top: target, behavior })
+  else target.scrollIntoView({ behavior })
 }
 
 /** Lenis integrado con ScrollTrigger y el ticker de GSAP. */
-/** Scroll suave hasta un elemento (p. ej. el resumen final). */
-export function scrollToEl(el: HTMLElement, duration = 1.8) {
-  if (lenis) lenis.scrollTo(el, { duration, lock: false })
-  else el.scrollIntoView({ behavior: sceneState.reducedMotion ? 'auto' : 'smooth' })
-}
-
 export function useLenis() {
   useEffect(() => {
     if (sceneState.reducedMotion) return

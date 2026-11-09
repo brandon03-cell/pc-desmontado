@@ -11,19 +11,22 @@ export interface NodeAnim {
   rz: number
 }
 
-export const zeroAnim = (): NodeAnim => ({ x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 })
-
 /** Un objeto mutable por nodo. La timeline escribe, PCModel lee en useFrame. Sin React. */
-export const nodeAnim = new Map<string, NodeAnim>(ALL_NODE_NAMES.map((n) => [n, zeroAnim()]))
+export const nodeAnim = new Map<string, NodeAnim>(
+  ALL_NODE_NAMES.map((n) => [n, { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 }]),
+)
+
+const [px, py, pz] = HERO_CAM.pos
+const [tx, ty, tz] = HERO_CAM.target
 
 /** Cámara animada por la timeline. shiftX/Y: desplazamiento de encuadre como fracción del viewport. */
 export const camState = {
-  px: HERO_CAM.pos[0],
-  py: HERO_CAM.pos[1],
-  pz: HERO_CAM.pos[2],
-  tx: HERO_CAM.target[0],
-  ty: HERO_CAM.target[1],
-  tz: HERO_CAM.target[2],
+  px,
+  py,
+  pz,
+  tx,
+  ty,
+  tz,
   shiftX: 0,
   shiftY: 0,
   /** Multiplicador extra de distancia (solo móvil, por paso) */

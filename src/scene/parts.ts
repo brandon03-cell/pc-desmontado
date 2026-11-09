@@ -113,4 +113,5 @@ export const PARTS: PartDef[] = [
   },
 ]
 
-export const ALL_NODE_NAMES = PARTS.flatMap((p) => p.nodes.map((n) => n.name))
+export const ALL_NODES = PARTS.flatMap((p) => p.nodes)
+export const ALL_NODE_NAMES = ALL_NODES.map((n) => n.name)

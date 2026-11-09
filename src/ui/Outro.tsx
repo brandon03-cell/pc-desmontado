@@ -1,6 +1,6 @@
 import { FINAL, PIEZAS } from '../content'
 import { STEPS } from '../scene/choreography'
-import { scrollToY } from '../scroll/useLenis'
+import { scrollTo } from '../scroll/useLenis'
 import { stepScrollY } from '../scroll/timeline'
 
 export function Outro() {
@@ -17,7 +17,7 @@ export function Outro() {
             const i = STEPS.findIndex((s) => s.partId === p.id)
             return (
               <li key={p.id}>
-                <button type="button" onClick={() => scrollToY(stepScrollY(i))}>
+                <button type="button" onClick={() => scrollTo(stepScrollY(i))}>
                   <span className="outro__num">{p.paso}</span>
                   <span className="outro__name">{p.titulo}</span>
                   <span className="outro__tag">{p.etiqueta}</span>
@@ -27,7 +27,7 @@ export function Outro() {
           })}
         </ol>
         <div className="outro__cta">
-          <button type="button" className="btn btn--primary" onClick={() => scrollToY(0, 3)}>
+          <button type="button" className="btn btn--primary" onClick={() => scrollTo(0, 3)}>
             {FINAL.ctaPrimario}
           </button>
           <a className="btn btn--ghost" href="#configura">

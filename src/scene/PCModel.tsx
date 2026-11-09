@@ -8,7 +8,6 @@ import { nodeAnim, readyStore, sceneState, type NodeAnim } from './animationStat
 import { glbUrlFor } from './device'
 import { usePlaceholderRoot } from './Placeholders'
 
-
 interface RigItem {
   obj: THREE.Object3D
   /** transform `assembled` leído al cargar */
@@ -133,24 +132,17 @@ function Rig({ root, hq }: { root: THREE.Object3D; hq: boolean }) {
   /** Velocidad (rad/s) y ángulo de cada rotor */
   const rotorSpin = useRef<{ speed: number; angle: number }[]>([])
 
-  const items = useMemo<RigItem[]>(() => {
+  const items = useMemo(() => {
     const out: RigItem[] = []
-    const missing: string[] = []
     for (const name of ALL_NODE_NAMES) {
       const obj = root.getObjectByName(name)
-      const anim = nodeAnim.get(name)
-      if (!obj || !anim) {
-        missing.push(name)
-        continue
-      }
-      const { p0, q0 } = home(obj)
-      out.push({ obj, p0, q0, anim })
+      if (!obj) continue
+      // Pivote: el origen de montaje de otro nodo (p. ej. la pasta térmica gira con el CPU)
+      const pivot = NODES[name]?.pivot
+      const pivotObj = pivot ? root.getObjectByName(pivot) : undefined
+      out.push({ obj, ...home(obj), anim: nodeAnim.get(name)!, pivot: pivotObj && home(pivotObj).p0.clone() })
     }
-    for (const it of out) {
-      const pv = NODES[it.obj.name]?.pivot
-      const pvObj = pv ? out.find((o) => o.obj.name === pv) : undefined
-      if (pvObj) it.pivot = pvObj.p0.clone()
-    }
+    const missing = ALL_NODE_NAMES.filter((name) => !out.some((it) => it.obj.name === name))
     if (missing.length) console.warn(`[PCModel] Faltan nodos en el modelo: ${missing.join(', ')}`)
     else if (import.meta.env.DEV) console.info(`[PCModel] ${out.length}/${ALL_NODE_NAMES.length} nodos encontrados`)
     tuneMaterials(root, hq)
